@@ -7,7 +7,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Function to fetch activities from API
   async function fetchActivities() {
     try {
-      const response = await fetch("/activities");
+      // Get filter values
+      const category = document.getElementById("category-filter").value;
+      const sort = document.getElementById("sort-filter").value;
+      const search = document.getElementById("search-filter").value;
+      // Build query string
+      const params = new URLSearchParams();
+      if (category) params.append("category", category);
+      if (sort) params.append("sort", sort);
+      if (search) params.append("search", search);
+      const response = await fetch(`/activities?${params.toString()}`);
       const activities = await response.json();
 
       // Clear loading message
@@ -153,6 +162,15 @@ document.addEventListener("DOMContentLoaded", () => {
       messageDiv.classList.remove("hidden");
       console.error("Error signing up:", error);
     }
+  });
+
+  // Add event listeners for filters
+  document.getElementById("category-filter").addEventListener("change", fetchActivities);
+  document.getElementById("sort-filter").addEventListener("change", fetchActivities);
+  document.getElementById("search-filter").addEventListener("input", () => {
+    // Debounce search
+    clearTimeout(window.searchDebounce);
+    window.searchDebounce = setTimeout(fetchActivities, 300);
   });
 
   // Initialize app
